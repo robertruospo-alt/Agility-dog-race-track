@@ -48,6 +48,29 @@ label{font-size:13px;color:var(--muted);display:block;margin:10px 0 4px}
 .paw .top{transition:transform .09s ease-out}
 .paw:active .top{transform:translateY(7px)}
 .pawt{fill:#fff;font:800 19px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;text-anchor:middle;paint-order:stroke;stroke:rgba(0,0,0,.18);stroke-width:2px;letter-spacing:.2px}
+.home{max-width:640px;margin:0 auto;padding:calc(8px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(28px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left))}
+.hero{border-radius:20px;overflow:hidden;margin:6px 0 10px;box-shadow:0 2px 10px rgba(0,0,0,.06)}.hero svg{display:block;width:100%;height:auto}
+.hello{display:flex;align-items:center;gap:12px;margin:6px 2px 14px}
+.av{width:52px;height:52px;border-radius:50%;background:#e9f5ee;display:flex;align-items:center;justify-content:center;font-size:30px;overflow:hidden;flex:0 0 auto;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.av img{width:100%;height:100%;object-fit:cover}
+.hbtns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hb{border:0;border-radius:18px;padding:16px 14px;min-height:130px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;color:#fff;font-weight:700;font-size:17px;line-height:1.2;box-shadow:0 6px 0 rgba(0,0,0,.18),0 8px 14px rgba(0,0,0,.12);transition:transform .08s,box-shadow .08s}
+.hb:active{transform:translateY(5px);box-shadow:0 1px 0 rgba(0,0,0,.18),0 2px 4px rgba(0,0,0,.12)}
+.hb .ic{font-size:34px;line-height:1}.hb small{display:block;font-weight:500;font-size:13px;opacity:.9;margin-top:4px}
+.hb.p{background:linear-gradient(160deg,#4f8ad8,#2f63b0)}.hb.d{background:linear-gradient(160deg,#f0a43a,#d27a12)}
+.hb.c{background:linear-gradient(160deg,#36b275,#1f7a4d);grid-column:1/3;min-height:110px}.hb.m{background:linear-gradient(160deg,#e0604f,#b83a2c)}
+.pg{max-width:640px;margin:0 auto;padding:calc(8px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(28px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left))}
+.pghead{display:flex;align-items:center;gap:8px;margin:4px 0 10px}.pghead h1{font-size:21px;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.emo{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:8px}.emo button{padding:0;min-height:40px;font-size:22px;border-radius:10px}.emo button.on{background:var(--pri2);border-color:var(--pri)}
+.bigav{width:110px;height:110px;font-size:62px;margin:8px auto}
+.dogc{display:flex;gap:12px;align-items:center}.dogc .av{width:56px;height:56px}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:10px}
+.pod{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer}
+.pod .ph{aspect-ratio:1;background:#eef2ec;display:flex;align-items:center;justify-content:center;font-size:44px}.pod .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.pod .tx{padding:8px 10px;font-size:13px}.pod .tx b{display:block;font-size:14px}
+.medal{display:inline-block;padding:2px 8px;border-radius:12px;background:#fff3c4;font-size:12px;font-weight:700;margin-bottom:3px}
+.photoin{display:flex;align-items:center;justify-content:center;border:2px dashed var(--line);border-radius:14px;min-height:170px;background:#fafbf9;overflow:hidden;cursor:pointer;margin-top:6px}
+.photoin img{max-width:100%;max-height:320px;display:block}
 .empty{text-align:center;padding:40px 10px;color:var(--muted)}
 /* editor */
 .editor{display:flex;flex-direction:column;height:100vh;height:100dvh}
@@ -262,10 +285,10 @@ function fieldSVG(c,opt={}){
 }
 
 /* ---------- stato & storage ---------- */
-const S={view:'list',courses:[],dogs:[],lib:[],libTab:'mine',loading:true,note:'',cur:null,dirty:false,tab:'obs',sel:null,open:null,vb:null,snap:true,dist:true,tags:true,q:''};
+const S={view:'home',profile:null,podi:[],courses:[],dogs:[],lib:[],libTab:'mine',loading:true,note:'',cur:null,dirty:false,tab:'obs',sel:null,open:null,vb:null,snap:true,dist:true,tags:true,q:''};
 const Store={
  async init(){
-  S.courses=lsGet('ag_courses',[]).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));S.dogs=lsGet('ag_dogs',[]);S.loading=false;
+  S.courses=lsGet('ag_courses',[]).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));S.dogs=lsGet('ag_dogs',[]).map(d=>Object.assign({id:d.id||uid()},d));S.profile=lsGet('ag_profile',null);S.podi=lsGet('ag_podi',[]);S.loading=false;
   try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(e){}
   render();
   try{const r=await fetch('library.json',{cache:'no-cache'});if(r.ok){const d=await r.json();S.lib=(d.courses||[]).map(c=>Object.assign(c,{len:c.len||Math.round(computePath(c).total*10)/10}));lsSet('ag_lib',S.lib)}}catch(e){S.lib=lsGet('ag_lib',[])}
@@ -286,13 +309,13 @@ function newCourse(){
 }
 
 /* ---------- vista lista ---------- */
-function render(){S.view==='list'?renderList():renderEditor()}
+function render(){if(S.view==='list')renderList();else if(S.view==='edit')renderEditor();else renderPage()}
 function renderList(){
  const q=S.q.trim().toLowerCase();
  const lib=S.libTab==='lib',src=lib?S.lib:S.courses;
  const list=src.filter(c=>!q||(c.name||'').toLowerCase().includes(q)||(c.judge||'').toLowerCase().includes(q)||(c.author||'').toLowerCase().includes(q));
  $('#app').innerHTML=`<div class="list">
-  <h1>Percorsi Agility</h1><div class="muted">Disegna, numera e salva i tuoi percorsi</div>
+  <div class="pghead" style="margin-bottom:0"><button class="ghost" data-h="home">‹ Home</button></div><h1>Percorsi Agility</h1><div class="muted">Sognando il netto! Disegna, numera e salva i tuoi percorsi</div>
   ${standalone()?'':`<div class="banner"><b>Installala:</b> in Safari tocca Condividi → “Aggiungi alla schermata Home”. Così si apre a schermo intero e funziona anche senza rete.</div>`}
   <div class="tabs" style="margin-top:12px;border-radius:12px;overflow:hidden;border:1px solid var(--line)"><button data-act="ltab" data-t="mine" class="${lib?'':'on'}">I miei (${S.courses.length})</button><button data-act="ltab" data-t="lib" class="${lib?'on':''}">Libreria (${S.lib.length})</button></div>
   ${lib?`<div class="hint">In cima i percorsi originali ★ creati per il campo, poi i percorsi di gara ricostruiti dalle mappe dei giudici. Aprendone uno ne crei una copia tua da modificare e salvare.</div>`:''}
@@ -334,7 +357,7 @@ document.addEventListener('click',async e=>{
  else if(a==='dupc'){const c=S.courses.find(x=>x.id===id);if(!c)return;const n=JSON.parse(JSON.stringify(c));n.id=uid();n.name=c.name+' (copia)';n.createdAt=n.updatedAt=Date.now();try{await Store.save(n);toast('Percorso duplicato');renderList()}catch(err){toast('Errore: '+(err.code||err.message))}}
  else if(a==='delc'){const c=S.courses.find(x=>x.id===id);if(!c)return;const r=await ask(`Eliminare “${esc(c.name)}”? L'operazione non si può annullare.`,[['no','Annulla'],['yes','Elimina','danger']]);if(r==='yes'){try{await Store.remove(id);toast('Percorso eliminato');renderList()}catch(err){toast('Errore: '+(err.code||err.message))}}}
  else if(a==='import'){importDialog()}
- else if(a==='backup'){const d=new Date().toISOString().slice(0,10);shareFile('agility-backup-'+d+'.json',{app:'percorsi-agility',v:1,courses:S.courses,dogs:S.dogs})}
+ else if(a==='backup'){fullBackup()}
  else if(a==='restore'){restoreBackup()}
 });
 function importDialog(){
@@ -467,7 +490,7 @@ async function onEdClick(e){
   case'down':if(i<c.steps.length-1){[c.steps[i+1],c.steps[i]]=[c.steps[i],c.steps[i+1]];S.open=i+1;markDirty();renderField();renderPanel()}return;
   case'rmstep':c.steps.splice(i,1);S.open=null;markDirty();renderField();renderPanel();return;
   case'rotfield':{const H=c.H;c.obs.forEach(o=>{const x=o.x;o.x=f2(H-o.y);o.y=f2(x);o.r=((o.r||0)+90)%360});[c.W,c.H]=[c.H,c.W];markDirty();fitView();renderField();renderPanel();return}
-  case'adddog':S.dogs=(S.dogs||[]).concat([{name:'',speed:4}]);await saveDogs();renderPanel();updSum();return;
+  case'adddog':S.dogs=(S.dogs||[]).concat([{id:uid(),name:'',speed:4,emoji:'🐕'}]);await saveDogs();renderPanel();updSum();return;
   case'rmdog':S.dogs.splice(i,1);await saveDogs();renderPanel();updSum();return;
   case'sharejson':{const body=JSON.parse(JSON.stringify(c));delete body.id;shareFile(slug(c.name)+'.json',body);return}
   case'sharepng':sharePNG(c);return;
@@ -540,6 +563,130 @@ function bindField(){
  svg.addEventListener('wheel',e=>{e.preventDefault();const p=svgPt(e.clientX,e.clientY);zoomAt(e.deltaY>0?1.12:1/1.12,p[0],p[1])},{passive:false});
 }
 
+/* ---------- immagini (IndexedDB) ---------- */
+const IDB={db:null,open(){if(this.db)return Promise.resolve(this.db);return new Promise((res,rej)=>{try{const r=indexedDB.open('agility',1);r.onupgradeneeded=()=>r.result.createObjectStore('img');r.onsuccess=()=>{this.db=r.result;res(this.db)};r.onerror=()=>rej(r.error)}catch(e){rej(e)}})},
+ async put(k,v){const d=await this.open();return new Promise((res,rej)=>{const t=d.transaction('img','readwrite');t.objectStore('img').put(v,k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})},
+ async get(k){const d=await this.open();return new Promise(res=>{const t=d.transaction('img').objectStore('img').get(k);t.onsuccess=()=>res(t.result||null);t.onerror=()=>res(null)})},
+ async del(k){const d=await this.open();return new Promise(res=>{const t=d.transaction('img','readwrite');t.objectStore('img').delete(k);t.oncomplete=()=>res();t.onerror=()=>res()})},
+ async keys(){const d=await this.open();return new Promise(res=>{const t=d.transaction('img').objectStore('img').getAllKeys();t.onsuccess=()=>res(t.result||[]);t.onerror=()=>res([])})}};
+const IMGURL={};
+async function imgURL(k){if(!k)return null;if(IMGURL[k])return IMGURL[k];try{const b=await IDB.get(k);if(!b)return null;return IMGURL[k]=URL.createObjectURL(b)}catch(e){return null}}
+function dropURL(k){if(IMGURL[k]){URL.revokeObjectURL(IMGURL[k]);delete IMGURL[k]}}
+function fillImgs(root){(root||document).querySelectorAll('img[data-k]').forEach(async im=>{const u=await imgURL(im.dataset.k);if(u)im.src=u;else im.replaceWith(Object.assign(document.createElement('span'),{textContent:im.dataset.fb||'📷'}))})}
+function pickPhoto(max){return new Promise(res=>{const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=async()=>{const f=i.files[0];if(!f)return res(null);try{res(await shrink(f,max||1400))}catch(e){toast('Foto non leggibile');res(null)}};i.click()})}
+function shrink(file,max){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=Math.round(im.width*k);cv.height=Math.round(im.height*k);cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);URL.revokeObjectURL(u);cv.toBlob(b=>b?res(b):rej(new Error('blob')),'image/jpeg',.85)};im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('img'))};im.src=u})}
+const EMOJI=['🙂','😎','🤠','🥰','💪','🏃‍♂️','🏃‍♀️','🧢','🐕','🐶','🦮','🐕‍🦺','🐾','🏆','🥇','⭐️'];
+const DOGEMO=['🐕','🐶','🦮','🐕‍🦺','🐩','🐺','🦊','🐾'];
+function avatarHTML(a,cls,fb){if(a&&a.photo)return`<div class="av ${cls||''}"><img data-k="${a.photo}" data-fb="${fb||'🙂'}" alt=""></div>`;return`<div class="av ${cls||''}">${esc((a&&a.emoji)||fb||'🙂')}</div>`}
+const saveProfile=()=>lsSet('ag_profile',S.profile),saveDogsLS=()=>lsSet('ag_dogs',S.dogs),savePodi=()=>lsSet('ag_podi',S.podi);
+
+/* ---------- pagine: home, profilo, cani, podi ---------- */
+const HERO=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 230"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dff1e6"/><stop offset="1" stop-color="#f2f4f0"/></linearGradient><linearGradient id="wood" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#c98a4b"/><stop offset="1" stop-color="#a86b34"/></linearGradient></defs><rect width="360" height="230" fill="url(#sky)"/><circle cx="300" cy="46" r="20" fill="#fff6c9"/><circle cx="309" cy="40" r="17" fill="#e4f3ea"/><g fill="#fff" opacity=".9"><circle cx="40" cy="40" r="2"/><circle cx="90" cy="24" r="1.5"/><circle cx="250" cy="22" r="1.5"/><circle cx="335" cy="90" r="1.8"/></g><ellipse cx="180" cy="206" rx="170" ry="18" fill="#9fcb8a"/><ellipse cx="180" cy="203" rx="150" ry="12" fill="#86b96f"/><!-- ostacolo sullo sfondo --><g opacity=".85"><rect x="296" y="150" width="6" height="52" rx="2" fill="#fff"/><rect x="336" y="150" width="6" height="52" rx="2" fill="#fff"/><rect x="299" y="166" width="40" height="6" rx="3" fill="#e8463a"/></g><!-- cuccia --><path d="M70 198 L70 120 L135 70 L200 120 L200 198 Z" fill="url(#wood)"/><g stroke="#8d5726" stroke-width="2" opacity=".5"><line x1="70" y1="140" x2="200" y2="140"/><line x1="70" y1="160" x2="200" y2="160"/><line x1="70" y1="180" x2="200" y2="180"/></g><path d="M58 126 L135 62 L212 126 L202 132 L135 76 L68 132 Z" fill="#1f7a4d"/><path d="M58 126 L135 62 L212 126" fill="none" stroke="#165c39" stroke-width="4" stroke-linejoin="round"/><path d="M110 198 L110 150 C110 132 160 132 160 150 L160 198 Z" fill="#4a2b12"/><rect x="112" y="104" width="46" height="14" rx="4" fill="#f2e3c6"/><text x="135" y="115" text-anchor="middle" font-family="-apple-system,Helvetica,Arial" font-size="10" font-weight="800" fill="#6b4220">AGILITY</text><!-- ciotola --><path d="M28 190 h26 l-4 9 h-18 Z" fill="#e8463a"/><ellipse cx="41" cy="190" rx="13" ry="3" fill="#b8322a"/><!-- border collie che dorme acciambellato --><g transform="translate(150 162)"><ellipse cx="44" cy="38" rx="50" ry="7" fill="#000" opacity=".12"/><path d="M2 30 C-2 8 24 -6 50 -4 C76 -2 94 12 92 30 C90 40 70 42 46 42 C20 42 4 40 2 30 Z" fill="#161616"/><!-- coda avvolta con punta bianca --><path d="M8 34 C14 44 40 46 62 42 C50 48 20 50 6 42 Z" fill="#161616"/><path d="M6 42 C2 40 2 35 8 34 C10 38 14 41 18 43 C14 44 9 44 6 42 Z" fill="#fff"/><!-- zampe anteriori bianche --><path d="M60 36 C70 34 84 34 92 37 C92 41 86 43 78 43 C70 43 62 42 60 36 Z" fill="#fff"/><!-- testa appoggiata --><path d="M66 10 C72 0 88 -2 98 6 C106 12 112 22 110 30 C104 36 88 36 78 32 C70 28 64 20 66 10 Z" fill="#161616"/><path d="M86 2 C84 -8 88 -14 94 -16 C98 -10 98 -2 96 4 Z" fill="#161616"/><path d="M74 6 C70 -2 72 -10 78 -12 C82 -6 82 0 80 6 Z" fill="#161616"/><!-- lista e muso bianchi --><path d="M90 6 C94 12 98 20 104 24 C110 26 112 30 108 32 C100 34 92 32 88 28 C90 20 90 12 90 6 Z" fill="#fff"/><ellipse cx="110" cy="29" rx="4" ry="3" fill="#161616"/><!-- collare bianco --><path d="M62 8 C70 14 72 26 66 36 C60 34 56 26 56 18 C56 12 58 9 62 8 Z" fill="#fff"/><!-- occhio chiuso --><path d="M82 16 q5 4 10 0" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/></g><!-- Zzz --><g font-family="-apple-system,Helvetica,Arial" font-weight="800" fill="#1f7a4d"><text x="262" y="150" font-size="16" opacity=".55">z</text><text x="276" y="132" font-size="21" opacity=".75">z</text><text x="293" y="110" font-size="27">Z</text></g></svg> `;
+function go(v){S.view=v;window.scrollTo(0,0);render()}
+function renderPage(){
+ const v=S.view,p=S.profile;let h='';
+ if(v==='home'){
+  const nm=p&&p.name?p.name.split(' ')[0]:'';
+  h=`<div class="home"><div class="hero">${HERO}</div>
+  <div class="hello">${avatarHTML(p,'','🐾')}<div><div style="font-size:20px;font-weight:750">${nm?`Ciao, ${esc(nm)}!`:'Benvenuto!'}</div><div class="muted">${S.dogs.length?S.dogs.map(d=>esc(d.name||'Cane')).join(' · '):'Percorsi Agility'}</div></div></div>
+  ${standalone()?'':`<div class="banner"><b>Installala:</b> in Safari tocca Condividi → “Aggiungi alla schermata Home”.</div>`}
+  <div class="hbtns">
+   <button class="hb c" data-h="list"><span class="ic">🏁</span><span>Crea il tuo percorso<small>sognando il netto! · editor e libreria</small></span></button>
+   <button class="hb p" data-h="profile"><span class="ic">${p&&p.name?'👤':'✏️'}</span><span>${p&&p.name?'Il mio profilo':'Crea il tuo profilo'}<small>nome, età, foto</small></span></button>
+   <button class="hb d" data-h="dogs"><span class="ic">🐕</span><span>I miei cani<small>${S.dogs.length?S.dogs.length+(S.dogs.length===1?' cane':' cani'):'aggiungi il primo'}</small></span></button>
+   <button class="hb m" data-h="podi" style="grid-column:1/3;min-height:96px"><span class="ic">🏆</span><span>I miei podi e medaglie<small>${S.podi.length?S.podi.length+(S.podi.length===1?' ricordo salvato':' ricordi salvati'):'foto, data, luogo e gara'}</small></span></button>
+  </div>
+  <div class="row" style="margin-top:16px;justify-content:center"><button data-act="backup">⬇︎ Backup completo</button><button data-act="restore">⬆︎ Ripristina</button></div>
+  <div class="muted" style="text-align:center;margin-top:6px">Tutto resta su questo telefono: fai un backup ogni tanto.</div></div>`;
+ }
+ else if(v==='profile'){
+  const q=p||{};
+  h=`<div class="pg"><div class="pghead"><button class="ghost" data-h="home">‹ Home</button><h1>Il mio profilo</h1></div>
+  <div class="card" style="text-align:center">${avatarHTML(q,'bigav','🙂')}
+   <div class="row" style="justify-content:center"><button data-h="pphoto">📷 Carica foto</button>${q.photo?`<button class="danger" data-h="pphotodel">Togli foto</button>`:''}</div>
+   <div class="muted" style="margin-top:8px">…oppure scegli un'emoji</div>
+   <div class="emo">${EMOJI.map(e=>`<button data-h="pemo" data-e="${e}" class="${!q.photo&&q.emoji===e?'on':''}">${e}</button>`).join('')}</div></div>
+  <div class="card"><label>Nome</label><input type="text" id="pname" value="${esc(q.name||'')}" placeholder="Il tuo nome" autocomplete="given-name">
+   <label>Età</label><input type="number" inputmode="numeric" id="page" min="5" max="99" value="${esc(q.age||'')}" placeholder="Anni">
+   <div class="row" style="margin-top:14px"><button class="primary grow" data-h="psave">Salva profilo</button></div></div></div>`;
+ }
+ else if(v==='dogs'){
+  h=`<div class="pg"><div class="pghead"><button class="ghost" data-h="home">‹ Home</button><h1>I miei cani</h1><button class="primary" data-h="dognew">+ Cane</button></div>
+  ${S.dogs.length?S.dogs.map(d=>`<div class="card dogc" data-h="dogedit" data-id="${d.id}" style="cursor:pointer">${avatarHTML(d,'','🐕')}<div style="flex:1;min-width:0"><b style="font-size:17px">${esc(d.name||'Senza nome')}</b><div class="muted">${esc([d.breed,d.age!==''&&d.age!=null?d.age+(d.age==1?' anno':' anni'):'',d.color].filter(Boolean).join(' · '))}</div><div class="muted">${[d.height?`${fmt(d.height)} cm al garrese`:'',d.speed>0?`${fmt(d.speed)} m/s`:''].filter(Boolean).join(' · ')}</div></div><span class="muted">›</span></div>`).join(''):`<div class="empty">Nessun cane ancora.<br>Tocca “+ Cane” per aggiungere il primo.</div>`}
+  <div class="muted">La velocità media serve all'editor per stimare il tempo sul percorso e confrontarlo con il TPS.</div></div>`;
+ }
+ else if(v==='podi'){
+  const L=S.podi.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  h=`<div class="pg"><div class="pghead"><button class="ghost" data-h="home">‹ Home</button><h1>Podi e medaglie</h1><button class="primary" data-h="podnew">+ Aggiungi</button></div>
+  ${L.length?`<div class="gal">${L.map(x=>`<div class="pod" data-h="podedit" data-id="${x.id}"><div class="ph">${x.img?`<img data-k="${x.img}" data-fb="🏆" alt="">`:'🏆'}</div><div class="tx">${x.result?`<span class="medal">${esc(x.result)}</span>`:''}<b>${esc(x.event||'Gara')}</b>${esc([x.date?new Date(x.date+'T12:00').toLocaleDateString('it-IT'):'',x.place].filter(Boolean).join(' · '))}${x.dog?`<div class="muted">🐕 ${esc(x.dog)}</div>`:''}</div></div>`).join('')}</div>`:`<div class="empty">Ancora nessun podio salvato.<br>Tocca “+ Aggiungi” e carica la foto del tuo primo podio! 🏆</div>`}</div>`;
+ }
+ $('#app').innerHTML=h;fillImgs($('#app'));
+}
+function dogDialog(d){
+ const isNew=!d;d=d?JSON.parse(JSON.stringify(d)):{id:uid(),name:'',breed:'',age:'',color:'',height:'',speed:4,emoji:'🐕'};
+ const m=document.createElement('div');m.className='modal';
+ const draw=()=>{m.innerHTML=`<div class="box" style="max-height:90vh;overflow:auto"><p><b>${isNew?'Nuovo cane':'Modifica cane'}</b></p>
+  <div style="text-align:center">${avatarHTML(d,'bigav','🐕')}<div class="row" style="justify-content:center"><button data-k="photo">📷 Foto</button>${d.photo?`<button class="danger" data-k="nophoto">Togli foto</button>`:''}</div>
+  <div class="emo">${DOGEMO.map(e=>`<button data-k="emo" data-e="${e}" class="${!d.photo&&d.emoji===e?'on':''}">${e}</button>`).join('')}</div></div>
+  <label>Nome</label><input type="text" id="dn" value="${esc(d.name)}">
+  <label>Razza</label><input type="text" id="db" value="${esc(d.breed)}" placeholder="es. Border collie">
+  <div class="row"><div class="grow"><label>Età (anni)</label><input type="number" inputmode="decimal" step=".5" min="0" max="25" id="da" value="${esc(d.age)}"></div><div class="grow"><label>Altezza al garrese (cm)</label><input type="number" inputmode="decimal" min="15" max="90" id="dh" value="${esc(d.height)}"></div></div>
+  <label>Colore</label><input type="text" id="dc" value="${esc(d.color)}" placeholder="es. bianco e nero">
+  <label>Velocità media sul percorso (m/s)</label><input type="number" inputmode="decimal" step=".1" min="0" max="8" id="ds" value="${esc(d.speed)}">
+  <div class="row" style="margin-top:14px">${isNew?'':`<button class="danger" data-k="del">Elimina</button>`}<button data-k="x">Annulla</button><button class="primary grow" data-k="ok">Salva</button></div></div>`;fillImgs(m)};
+ const read=()=>{const v=id=>m.querySelector('#'+id).value;d.name=v('dn').trim();d.breed=v('db').trim();d.age=v('da')===''?'':num(v('da'));d.height=v('dh')===''?'':num(v('dh'));d.color=v('dc').trim();d.speed=num(v('ds'))};
+ m.onclick=async e=>{const b=e.target.closest('[data-k]');if(!b){if(e.target===m)m.remove();return}const k=b.dataset.k;
+  if(k==='x'){m.remove();return}
+  read();
+  if(k==='emo'){d.emoji=b.dataset.e;if(d.photo){await IDB.del(d.photo).catch(()=>{});dropURL(d.photo);delete d.photo}draw();return}
+  if(k==='photo'){const bl=await pickPhoto(900);if(bl){const key='dog-'+d.id+'-'+Date.now();try{await IDB.put(key,bl);if(d.photo){IDB.del(d.photo).catch(()=>{});dropURL(d.photo)}d.photo=key;draw()}catch(e){toast('Spazio non disponibile per la foto')}}return}
+  if(k==='nophoto'){if(d.photo){await IDB.del(d.photo).catch(()=>{});dropURL(d.photo);delete d.photo}draw();return}
+  if(k==='del'){const r=await ask(`Eliminare ${esc(d.name||'questo cane')}?`,[['no','Annulla'],['yes','Elimina','danger']]);if(r!=='yes')return;if(d.photo)IDB.del(d.photo).catch(()=>{});S.dogs=S.dogs.filter(x=>x.id!==d.id);saveDogsLS();m.remove();render();return}
+  if(k==='ok'){if(!d.name){toast('Scrivi il nome del cane');return}const i=S.dogs.findIndex(x=>x.id===d.id);if(i>=0)S.dogs[i]=d;else S.dogs.push(d);saveDogsLS();m.remove();render();toast('Salvato')}};
+ draw();document.body.appendChild(m);
+}
+function podDialog(x){
+ const isNew=!x;x=x?Object.assign({},x):{id:uid(),date:new Date().toISOString().slice(0,10),place:'',event:'',result:'',dog:S.dogs.length===1?S.dogs[0].name:'',note:''};
+ let newImg=null;
+ const m=document.createElement('div');m.className='modal';
+ const RES=['🥇 1° posto','🥈 2° posto','🥉 3° posto','🏅 Medaglia','✨ Netto','⭐ Qualifica','🏆 Altro'];
+ const draw=()=>{m.innerHTML=`<div class="box" style="max-height:92vh;overflow:auto"><p><b>${isNew?'Nuovo podio':'Il tuo podio'}</b></p>
+  <div class="photoin" data-k="photo">${newImg?`<img src="${newImg.url}" alt="">`:x.img?`<img data-k="${x.img}" data-fb="🏆" alt="">`:`<span class="muted" style="text-align:center">📷<br>Tocca per caricare la foto</span>`}</div>
+  <label>Risultato</label><div class="chips">${RES.map(r=>`<button data-k="res" data-r="${r}" class="${x.result===r?'on':''}">${r}</button>`).join('')}</div>
+  <label>Gara / evento</label><input type="text" id="pe" value="${esc(x.event)}" placeholder="es. Campionato regionale – Agility 2">
+  <div class="row"><div class="grow"><label>Data</label><input type="date" id="pd" value="${esc(x.date)}" style="min-height:40px"></div><div class="grow"><label>Luogo</label><input type="text" id="pl" value="${esc(x.place)}" placeholder="es. Bari"></div></div>
+  <label>Cane</label>${S.dogs.length?`<select id="pg"><option value="">—</option>${S.dogs.map(d=>`<option ${d.name===x.dog?'selected':''}>${esc(d.name)}</option>`).join('')}</select>`:`<input type="text" id="pg" value="${esc(x.dog)}" placeholder="Nome del cane">`}
+  <label>Note</label><textarea id="pn" rows="2" placeholder="es. netto e 2° tempo di categoria">${esc(x.note||'')}</textarea>
+  <div class="row" style="margin-top:14px">${isNew?'':`<button class="danger" data-k="del">Elimina</button>`}${!isNew&&x.img?`<button data-k="share">⤴︎</button>`:''}<button data-k="x">Annulla</button><button class="primary grow" data-k="ok">Salva</button></div></div>`;fillImgs(m)};
+ const read=()=>{const v=id=>m.querySelector('#'+id).value;x.event=v('pe').trim();x.date=v('pd');x.place=v('pl').trim();x.dog=v('pg');x.note=v('pn').trim()};
+ m.onclick=async e=>{const b=e.target.closest('[data-k]');if(!b){if(e.target===m){if(newImg)URL.revokeObjectURL(newImg.url);m.remove()}return}const k=b.dataset.k;
+  if(k==='x'){if(newImg)URL.revokeObjectURL(newImg.url);m.remove();return}
+  read();
+  if(k==='res'){x.result=x.result===b.dataset.r?'':b.dataset.r;draw();return}
+  if(k==='photo'){const bl=await pickPhoto(1600);if(bl){if(newImg)URL.revokeObjectURL(newImg.url);newImg={blob:bl,url:URL.createObjectURL(bl)};draw()}return}
+  if(k==='share'){const bl=await IDB.get(x.img);if(bl)shareBlob(slug(x.event||'podio')+'.jpg',bl);return}
+  if(k==='del'){const r=await ask('Eliminare questo podio e la sua foto?',[['no','Annulla'],['yes','Elimina','danger']]);if(r!=='yes')return;if(x.img){IDB.del(x.img).catch(()=>{});dropURL(x.img)}S.podi=S.podi.filter(y=>y.id!==x.id);savePodi();m.remove();render();return}
+  if(k==='ok'){
+   if(!x.event&&!newImg&&!x.img){toast('Aggiungi almeno la foto o il nome della gara');return}
+   if(newImg){const key='pod-'+x.id+'-'+Date.now();try{await IDB.put(key,newImg.blob);if(x.img){IDB.del(x.img).catch(()=>{});dropURL(x.img)}x.img=key}catch(e){toast('Spazio non disponibile per la foto');return}URL.revokeObjectURL(newImg.url)}
+   const i=S.podi.findIndex(y=>y.id===x.id);if(i>=0)S.podi[i]=x;else S.podi.push(x);savePodi();m.remove();render();toast(isNew?'Podio salvato 🏆':'Salvato')}};
+ draw();document.body.appendChild(m);
+}
+document.addEventListener('click',async e=>{
+ const b=e.target.closest('[data-h]');if(!b)return;const h=b.dataset.h;
+ if(['home','list','profile','dogs','podi'].includes(h)){if(h==='list')S.libTab=S.libTab||'mine';go(h);return}
+ if(h==='pemo'){S.profile=Object.assign({},S.profile||{},{emoji:b.dataset.e});if(S.profile.photo){IDB.del(S.profile.photo).catch(()=>{});dropURL(S.profile.photo);delete S.profile.photo}keepProfileInputs();saveProfile();render();restoreProfileInputs();return}
+ if(h==='pphoto'){const bl=await pickPhoto(800);if(!bl)return;const key='prof-'+Date.now();try{await IDB.put(key,bl)}catch(err){toast('Spazio non disponibile per la foto');return}keepProfileInputs();if(S.profile&&S.profile.photo){IDB.del(S.profile.photo).catch(()=>{});dropURL(S.profile.photo)}S.profile=Object.assign({},S.profile||{},{photo:key});saveProfile();render();restoreProfileInputs();return}
+ if(h==='pphotodel'){keepProfileInputs();if(S.profile&&S.profile.photo){IDB.del(S.profile.photo).catch(()=>{});dropURL(S.profile.photo);delete S.profile.photo}saveProfile();render();restoreProfileInputs();return}
+ if(h==='psave'){const n=$('#pname').value.trim(),a=$('#page').value;S.profile=Object.assign({},S.profile||{},{name:n,age:a===''?'':num(a)});if(!S.profile.emoji&&!S.profile.photo)S.profile.emoji='🙂';saveProfile();toast('Profilo salvato');go('home');return}
+ if(h==='dognew'){dogDialog(null);return}
+ if(h==='dogedit'){const d=S.dogs.find(x=>x.id===b.dataset.id);if(d)dogDialog(d);return}
+ if(h==='podnew'){podDialog(null);return}
+ if(h==='podedit'){const x=S.podi.find(y=>y.id===b.dataset.id);if(x)podDialog(x);return}
+});
+let _pin=null;function keepProfileInputs(){const n=$('#pname'),a=$('#page');_pin=n?{n:n.value,a:a.value}:null}
+function restoreProfileInputs(){if(_pin&&$('#pname')){$('#pname').value=_pin.n;$('#page').value=_pin.a}}
+
 /* ---------- PWA: file, condivisione, backup ---------- */
 function standalone(){return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true}
 function slug(n){return (n||'percorso').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase()||'percorso'}
@@ -548,13 +695,24 @@ async function shareBlob(name,blob){
  const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);
 }
 function shareFile(name,obj){shareBlob(name,new Blob([JSON.stringify(obj,null,1)],{type:'application/json'}))}
+const blob2data=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.onerror=()=>r(null);f.readAsDataURL(b)});
+async function fullBackup(){
+ toast('Preparo il backup…');const imgs={};
+ try{for(const k of await IDB.keys()){const b=await IDB.get(k);if(b){const d=await blob2data(b);if(d)imgs[k]=d}}}catch(e){}
+ const d=new Date().toISOString().slice(0,10);
+ shareFile('agility-backup-'+d+'.json',{app:'percorsi-agility',v:2,courses:S.courses,dogs:S.dogs,profile:S.profile,podi:S.podi,imgs});
+}
+document.addEventListener('click',e=>{if(S.view!=='home')return;const b=e.target.closest('[data-act]');if(!b)return;if(b.dataset.act==='backup')fullBackup();else if(b.dataset.act==='restore')restoreBackup()});
 function restoreBackup(){
  const i=document.createElement('input');i.type='file';i.accept='.json,application/json';
  i.onchange=async()=>{const f=i.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!Array.isArray(d.courses))throw 0;
-  const r=await ask(`Il backup contiene ${d.courses.length} percorsi. Unirli a quelli presenti (stessi percorsi aggiornati) o sostituire tutto?`,[['no','Annulla'],['merge','Unisci'],['replace','Sostituisci','danger']]);
+  const r=await ask(`Il backup contiene ${d.courses.length} percorsi${d.podi?`, ${d.podi.length} podi`:''}${d.dogs?` e ${d.dogs.length} cani`:''}. Unirli a quelli presenti o sostituire tutto?`,[['no','Annulla'],['merge','Unisci'],['replace','Sostituisci','danger']]);
   if(!r||r==='no')return;let a=r==='replace'?[]:lsGet('ag_courses',[]);const ids=new Set(d.courses.map(c=>c.id));a=a.filter(c=>!ids.has(c.id)).concat(d.courses);
-  lsSet('ag_courses',a);if(Array.isArray(d.dogs)&&(r==='replace'||!S.dogs.length)){S.dogs=d.dogs;lsSet('ag_dogs',d.dogs)}
-  S.courses=a.sort((x,y)=>(y.updatedAt||0)-(x.updatedAt||0));renderList();toast('Backup ripristinato')}catch(e){toast('File di backup non valido')}};
+  lsSet('ag_courses',a);if(Array.isArray(d.dogs)&&(r==='replace'||!S.dogs.length)){S.dogs=d.dogs.map(x=>Object.assign({id:x.id||uid()},x));lsSet('ag_dogs',S.dogs)}
+  if(d.profile&&(r==='replace'||!S.profile)){S.profile=d.profile;saveProfile()}
+  if(Array.isArray(d.podi)){const ids=new Set(d.podi.map(x=>x.id));S.podi=(r==='replace'?[]:S.podi.filter(x=>!ids.has(x.id))).concat(d.podi);savePodi()}
+  if(d.imgs){for(const k in d.imgs){try{const bl=await (await fetch(d.imgs[k])).blob();await IDB.put(k,bl);dropURL(k)}catch(e){}}}
+  S.courses=a.sort((x,y)=>(y.updatedAt||0)-(x.updatedAt||0));render();toast('Backup ripristinato')}catch(e){toast('File di backup non valido')}};
  i.click();
 }
 function courseCanvas(c,maxPx,print){

@@ -12,7 +12,18 @@ App web per disegnare, numerare e salvare percorsi di **agility dog**, pensata p
 
 Non serve nessun account.
 
-## Cosa si può fare
+## Home
+
+All'apertura c'è la home con quattro sezioni:
+
+- **Crea il tuo profilo:** nome, età e foto o emoji.
+- **I miei cani:** nome, razza, età, colore, altezza al garrese e velocità media (usata per stimare i tempi).
+- **Crea il tuo percorso, sognando il netto!:** editor e Libreria.
+- **I miei podi e medaglie:** foto del podio con risultato, gara, data, luogo, cane e note.
+
+Profilo, cani, podi e foto restano sul telefono. Il backup completo li salva tutti insieme in un unico file.
+
+## Cosa si può fare nell'editor
 
 - **Ostacoli:** salto, salto doppio, muro, ruota, salto in lungo, tunnel (lunghezza e curvatura regolabili), slalom (6–12 paletti), passerella, palizzata, altalena, partenza e arrivo. Si trascinano sul campo e si ruotano. Con due dita si fa zoom.
 - **Numerazione:** si toccano gli ostacoli nell'ordine del percorso e i numeri compaiono sul campo, con la linea del cane e le distanze. Lo stesso ostacolo si può ripetere, e per tunnel, zone e slalom si può invertire il verso.
