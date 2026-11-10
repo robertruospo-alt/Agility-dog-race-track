@@ -290,7 +290,7 @@ function render(){S.view==='list'?renderList():renderEditor()}
 function renderList(){
  const q=S.q.trim().toLowerCase();
  const lib=S.libTab==='lib',src=lib?S.lib:S.courses;
- const list=src.filter(c=>!q||(c.name||'').toLowerCase().includes(q)||(c.judge||'').toLowerCase().includes(q));
+ const list=src.filter(c=>!q||(c.name||'').toLowerCase().includes(q)||(c.judge||'').toLowerCase().includes(q)||(c.author||'').toLowerCase().includes(q));
  $('#app').innerHTML=`<div class="list">
   <h1>Percorsi Agility</h1><div class="muted">Disegna, numera e salva i tuoi percorsi</div>
   ${standalone()?'':`<div class="banner"><b>Installala:</b> in Safari tocca Condividi → “Aggiungi alla schermata Home”. Così si apre a schermo intero e funziona anche senza rete.</div>`}
@@ -319,7 +319,7 @@ function renderList(){
   ${S.loading?`<div class="empty">Caricamento…</div>`:list.length?`<div class="grid">${list.map(c=>{
    const th=fieldSVG(c,{badges:true}).svg;
    return`<div class="cc"><div class="th" data-act="open" data-id="${c.id}"><svg viewBox="-1 -1 ${c.W+2} ${c.H+2}" preserveAspectRatio="xMidYMid meet">${th}</svg></div>
-   <div class="bd"><div class="nm">${esc(c.name)}</div><div class="muted">${esc([c.kind,c.grade&&('Grado '+c.grade),c.size].filter(Boolean).join(' · '))}</div><div class="muted">${c.W}×${c.H} m · ${(c.obs||[]).filter(o=>!isPA(o.t)).length} ostacoli · ${fmt(c.len||0)} m</div>${lib?(c.judge?`<div class="muted">Giudice: ${esc(c.judge)}</div>`:''):`<div class="muted">Modificato ${new Date(c.updatedAt||0).toLocaleDateString('it-IT')}</div>`}</div>
+   <div class="bd"><div class="nm">${esc(c.name)}</div><div class="muted">${esc([c.kind,c.grade&&('Grado '+c.grade),c.size].filter(Boolean).join(' · '))}</div><div class="muted">${c.W}×${c.H} m · ${(c.obs||[]).filter(o=>!isPA(o.t)).length} ostacoli · ${fmt(c.len||0)} m</div>${lib?(c.author?`<div class="muted" style="color:var(--pri);font-weight:600">★ Creato da ${esc(c.author)}</div>`:c.judge?`<div class="muted">Giudice: ${esc(c.judge)}</div>`:''):`<div class="muted">Modificato ${new Date(c.updatedAt||0).toLocaleDateString('it-IT')}</div>`}</div>
    <div class="ft">${lib?`<button class="primary" data-act="open" data-id="${c.id}">Apri e copia nei miei</button>`:`<button data-act="open" data-id="${c.id}">Apri</button><button data-act="dupc" data-id="${c.id}">Duplica</button><button class="danger" data-act="delc" data-id="${c.id}">Elimina</button>`}</div></div>`}).join('')}</div>`
    :`<div class="empty">${q?'Nessun percorso trovato.':lib?'La libreria è vuota o non è raggiungibile.':'Nessun percorso ancora.<br>Tocca la zampa per disegnare il primo.'}</div>`}
  </div>`;
