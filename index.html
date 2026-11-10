@@ -295,7 +295,7 @@ function renderList(){
   <h1>Percorsi Agility</h1><div class="muted">Disegna, numera e salva i tuoi percorsi</div>
   ${standalone()?'':`<div class="banner"><b>Installala:</b> in Safari tocca Condividi → “Aggiungi alla schermata Home”. Così si apre a schermo intero e funziona anche senza rete.</div>`}
   <div class="tabs" style="margin-top:12px;border-radius:12px;overflow:hidden;border:1px solid var(--line)"><button data-act="ltab" data-t="mine" class="${lib?'':'on'}">I miei (${S.courses.length})</button><button data-act="ltab" data-t="lib" class="${lib?'on':''}">Libreria (${S.lib.length})</button></div>
-  ${lib?`<div class="hint">Percorsi di gara ricostruiti dalle mappe pubblicate dai giudici. Aprendone uno ne crei una copia tua da modificare e salvare.</div>`:''}
+  ${lib?`<div class="hint">In cima i percorsi originali ★ creati per il campo, poi i percorsi di gara ricostruiti dalle mappe dei giudici. Aprendone uno ne crei una copia tua da modificare e salvare.</div>`:''}
   ${lib?'':`<div class="pawwrap"><button class="paw" data-act="new" aria-label="Crea il tuo nuovo percorso"><svg viewBox="0 0 240 222" aria-hidden="true">
  <defs>
   <linearGradient id="pawg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3dbb7c"/><stop offset=".55" stop-color="#23854f"/><stop offset="1" stop-color="#186b3f"/></linearGradient>

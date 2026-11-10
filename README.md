@@ -26,19 +26,30 @@ Non serve nessun account.
 - **I miei** sono salvati solo sul proprio telefono. Ogni tanto conviene fare **⬇︎ Backup completo**, per esempio su iCloud Drive, e usare **⬆︎ Ripristina backup** per passarli su un altro dispositivo.
 - **Libreria** contiene percorsi di gara ricostruiti dalle mappe pubblicate dai giudici, ed è uguale per tutti. Con **Apri e copia nei miei** se ne crea una copia personale da modificare.
 
-### Percorsi in Libreria
+### Percorsi in Libreria (26)
 
-| Percorso | Tipo | Giudice | Lunghezza |
-|---|---|---|---|
-| ProsecCup 2026 – Agility 2 (S/M/I/L) | Agility | Gabriel Arriagada Osses | ≈178 m (misurata) |
-| ProsecCup 2026 – Jumping 3 Large | Jumping | Gabriel Arriagada Osses | ≈189 m (misurata) |
-| HAM 26 – Jumping 3 Inter/Large | Jumping | – | ≈220 m (misurata) |
-| European Open 2026 – Jumping Individuale Large | Jumping | Cédric Bargoin | 197,3 m |
-| European Open 2026 – Jumping Individuale Intermediate | Jumping | Gabriel Arriagada Osses | 201,4 m |
-| Prague Agility Party – Agility Individuale Medium | Agility | Max Glover | 244,1 m |
-| Breizh Cup – Agility G3 Inter/Large | Agility | – | 228,3 m |
-| IconiX Summer Fiesta 2025 – Agility G6-7 | Agility | Stefanie Semkat | 225,3 m |
-| 4S Agility – Campo completo (50 numeri) | Allenamento | – | 563,9 m |
+**★ 10 varianti originali** (Agility G1–G3 e Jumping G1–G3, campi 40×30, 40×20, 40×22, 40×25, 32×32, 32×30, 50×24), ispirate ai percorsi di gara. Le linee sono pensate per la sicurezza del cane: 5–8,5 m tra un ostacolo e l'altro, raggio di curva minimo 2,6 m, nessuna svolta secca sui salti, entrata e uscita dritte da zone e slalom, nessuna linea che passa su un altro ostacolo.
+
+**16 percorsi di gara ricostruiti:**
+
+| Percorso | Giudice | Lunghezza |
+|---|---|---|
+| ProsecCup 2026 – Agility 2 (S/M/I/L) | Gabriel Arriagada Osses | ≈178 m (misurata) |
+| ProsecCup 2026 – Jumping 3 Large | Gabriel Arriagada Osses | ≈189 m (misurata) |
+| HAM 26 – Jumping 3 Inter/Large | – | ≈220 m (misurata) |
+| European Open 2026 – Jumping Individuale Large | Cédric Bargoin | 197,3 m |
+| European Open 2026 – Jumping Individuale Intermediate | Gabriel Arriagada Osses | 201,4 m |
+| European Open 2026 – Agility Individuale Small | Eric Courant | 203,1 m |
+| European Open 2026 – Finale Agility Individuale Inter | Eric Courant | 211,6 m |
+| Prague Agility Party – Agility Individuale Medium | Max Glover | 244,1 m |
+| Breizh Cup – Agility G3 Inter/Large | – | 228,3 m |
+| Breizh Cup – Agility G3 Small/Medium | – | 191,2 m |
+| Breizh Cup – Selettivo a squadre I/L | – | 166,5 m |
+| VERY Breizh Cup 2026 – Finale Agility Medium/Small | Marko Mäkelä | ≈241 m (misurata) |
+| SV OG Wipperdorf 2026 – Agility 3 | René Blank | 219,9 m |
+| HUGS 2026 – Agility A3 | Elpida Ismael | ≈215 m (misurata) |
+| IconiX Summer Fiesta 2025 – Agility G6-7 | Stefanie Semkat | 225,3 m |
+| 4S Agility – Campo completo (50 numeri) | – | 563,9 m |
 
 Le ricostruzioni hanno una precisione di circa mezzo metro. Dove la mappa non aveva la griglia, le dimensioni del campo sono stimate. Le mappe originali restano opera dei rispettivi giudici e servono qui solo come riferimento per l'allenamento.
 
