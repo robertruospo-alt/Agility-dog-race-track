@@ -252,12 +252,14 @@ function fieldSVG(c,opt={}){
 }
 
 /* ---------- stato & storage ---------- */
-const S={view:'list',courses:[],dogs:[],loading:true,note:'',cur:null,dirty:false,tab:'obs',sel:null,open:null,vb:null,snap:true,dist:true,tags:true,q:''};
+const S={view:'list',courses:[],dogs:[],lib:[],libTab:'mine',loading:true,note:'',cur:null,dirty:false,tab:'obs',sel:null,open:null,vb:null,snap:true,dist:true,tags:true,q:''};
 const Store={
  async init(){
   S.courses=lsGet('ag_courses',[]).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));S.dogs=lsGet('ag_dogs',[]);S.loading=false;
   try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(e){}
   render();
+  try{const r=await fetch('library.json',{cache:'no-cache'});if(r.ok){const d=await r.json();S.lib=(d.courses||[]).map(c=>Object.assign(c,{len:c.len||Math.round(computePath(c).total*10)/10}));lsSet('ag_lib',S.lib)}}catch(e){S.lib=lsGet('ag_lib',[])}
+  if(S.view==='list')renderList();
  },
  async save(c){
   const body=JSON.parse(JSON.stringify(c));
@@ -277,25 +279,30 @@ function newCourse(){
 function render(){S.view==='list'?renderList():renderEditor()}
 function renderList(){
  const q=S.q.trim().toLowerCase();
- const list=S.courses.filter(c=>!q||(c.name||'').toLowerCase().includes(q)||(c.judge||'').toLowerCase().includes(q));
+ const lib=S.libTab==='lib',src=lib?S.lib:S.courses;
+ const list=src.filter(c=>!q||(c.name||'').toLowerCase().includes(q)||(c.judge||'').toLowerCase().includes(q));
  $('#app').innerHTML=`<div class="list">
   <h1>Percorsi Agility</h1><div class="muted">Disegna, numera e salva i tuoi percorsi</div>
   ${standalone()?'':`<div class="banner"><b>Installala:</b> in Safari tocca Condividi → “Aggiungi alla schermata Home”. Così si apre a schermo intero e funziona anche senza rete.</div>`}
+  <div class="tabs" style="margin-top:12px;border-radius:12px;overflow:hidden;border:1px solid var(--line)"><button data-act="ltab" data-t="mine" class="${lib?'':'on'}">I miei (${S.courses.length})</button><button data-act="ltab" data-t="lib" class="${lib?'on':''}">Libreria (${S.lib.length})</button></div>
+  ${lib?`<div class="hint">Percorsi di gara ricostruiti dalle mappe pubblicate dai giudici. Aprendone uno ne crei una copia tua da modificare e salvare.</div>`:''}
   <div class="row" style="margin-top:12px"><input class="grow" type="text" id="q" placeholder="Cerca per nome o giudice…" value="${esc(S.q)}"><button class="primary" data-act="new">+ Nuovo</button><button data-act="import">Importa</button></div>
   <div class="row" style="margin-top:8px"><button data-act="backup">⬇︎ Backup completo</button><button data-act="restore">⬆︎ Ripristina backup</button><span class="muted">I dati restano su questo dispositivo: fai un backup ogni tanto.</span></div>
   ${S.loading?`<div class="empty">Caricamento…</div>`:list.length?`<div class="grid">${list.map(c=>{
    const th=fieldSVG(c,{badges:true}).svg;
    return`<div class="cc"><div class="th" data-act="open" data-id="${c.id}"><svg viewBox="-1 -1 ${c.W+2} ${c.H+2}" preserveAspectRatio="xMidYMid meet">${th}</svg></div>
-   <div class="bd"><div class="nm">${esc(c.name)}</div><div class="muted">${esc([c.kind,c.grade&&('Grado '+c.grade),c.size].filter(Boolean).join(' · '))}</div><div class="muted">${c.W}×${c.H} m · ${(c.obs||[]).filter(o=>!isPA(o.t)).length} ostacoli · ${fmt(c.len||0)} m</div><div class="muted">Modificato ${new Date(c.updatedAt||0).toLocaleDateString('it-IT')}</div></div>
-   <div class="ft"><button data-act="open" data-id="${c.id}">Apri</button><button data-act="dupc" data-id="${c.id}">Duplica</button><button class="danger" data-act="delc" data-id="${c.id}">Elimina</button></div></div>`}).join('')}</div>`
-   :`<div class="empty">${q?'Nessun percorso trovato.':'Nessun percorso ancora.<br>Tocca “+ Nuovo” per disegnare il primo.'}</div>`}
+   <div class="bd"><div class="nm">${esc(c.name)}</div><div class="muted">${esc([c.kind,c.grade&&('Grado '+c.grade),c.size].filter(Boolean).join(' · '))}</div><div class="muted">${c.W}×${c.H} m · ${(c.obs||[]).filter(o=>!isPA(o.t)).length} ostacoli · ${fmt(c.len||0)} m</div>${lib?(c.judge?`<div class="muted">Giudice: ${esc(c.judge)}</div>`:''):`<div class="muted">Modificato ${new Date(c.updatedAt||0).toLocaleDateString('it-IT')}</div>`}</div>
+   <div class="ft">${lib?`<button class="primary" data-act="open" data-id="${c.id}">Apri e copia nei miei</button>`:`<button data-act="open" data-id="${c.id}">Apri</button><button data-act="dupc" data-id="${c.id}">Duplica</button><button class="danger" data-act="delc" data-id="${c.id}">Elimina</button>`}</div></div>`}).join('')}</div>`
+   :`<div class="empty">${q?'Nessun percorso trovato.':lib?'La libreria è vuota o non è raggiungibile.':'Nessun percorso ancora.<br>Tocca “+ Nuovo” per disegnare il primo.'}</div>`}
  </div>`;
  const qi=$('#q');qi.oninput=()=>{S.q=qi.value;const p=qi.selectionStart;renderList();const n=$('#q');n.focus();try{n.setSelectionRange(p,p)}catch(e){}};
 }
 document.addEventListener('click',async e=>{
  if(S.view!=='list')return;const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,id=b.dataset.id;
  if(a==='new'){openEditor(newCourse(),true)}
- else if(a==='open'){const c=S.courses.find(x=>x.id===id);if(c)openEditor(JSON.parse(JSON.stringify(c)),false)}
+ else if(a==='ltab'){S.libTab=b.dataset.t;renderList()}
+ else if(a==='open'){if(S.libTab==='lib'){const c=S.lib.find(x=>x.id===id);if(!c)return;const n=JSON.parse(JSON.stringify(c));n.fromLib=c.id;n.id=uid();n.createdAt=n.updatedAt=Date.now();openEditor(n,true);toast('Copia dalla libreria: tocca Salva per tenerla');return}
+  const c=S.courses.find(x=>x.id===id);if(c)openEditor(JSON.parse(JSON.stringify(c)),false)}
  else if(a==='dupc'){const c=S.courses.find(x=>x.id===id);if(!c)return;const n=JSON.parse(JSON.stringify(c));n.id=uid();n.name=c.name+' (copia)';n.createdAt=n.updatedAt=Date.now();try{await Store.save(n);toast('Percorso duplicato');renderList()}catch(err){toast('Errore: '+(err.code||err.message))}}
  else if(a==='delc'){const c=S.courses.find(x=>x.id===id);if(!c)return;const r=await ask(`Eliminare “${esc(c.name)}”? L'operazione non si può annullare.`,[['no','Annulla'],['yes','Elimina','danger']]);if(r==='yes'){try{await Store.remove(id);toast('Percorso eliminato');renderList()}catch(err){toast('Errore: '+(err.code||err.message))}}}
  else if(a==='import'){importDialog()}
@@ -345,11 +352,11 @@ function renderField(){
 }
 function updSum(){
  const el=$('#sum');if(!el||!S.cur)return;const c=S.cur;const P=S.P||computePath(c);
- const L=P.total;
+ const L=c.refLen>0?c.refLen:P.total;
  if(P.items.length<2){el.innerHTML=`<span class="muted">${c.obs.length?'Vai su “Numerazione” e tocca gli ostacoli in ordine per calcolare lunghezza e tempi.':'Aggiungi ostacoli dalla scheda “Ostacoli”.'}</span>`;return}
  const tps=Math.ceil(L/(c.judgeSpeed||3.5)),tpm=Math.ceil(tps*(c.coeff||1.5));
  const dogs=(S.dogs||[]).filter(d=>d.speed>0);
- el.innerHTML=`Lunghezza <b>${fmt(L)} m</b> · TPS <b>${tps} s</b> · TPM <b>${tpm} s</b>${dogs.length?`<div class="dogs">${dogs.map(d=>`${esc(d.name||'Cane')}: <b>${fmt(L/d.speed)} s</b> (${fmt(d.speed)} m/s)`).join(' · ')}</div>`:''}`;
+ el.innerHTML=`Lunghezza <b>${fmt(L)} m</b>${c.refLen>0?` <span class="muted">(ufficiale; misurata ${fmt(P.total)})</span>`:''} · TPS <b>${tps} s</b> · TPM <b>${tpm} s</b>${dogs.length?`<div class="dogs">${dogs.map(d=>`${esc(d.name||'Cane')}: <b>${fmt(L/d.speed)} s</b> (${fmt(d.speed)} m/s)`).join(' · ')}</div>`:''}`;
 }
 function markDirty(){if(!S.dirty){S.dirty=true;updDirty()}}
 function updDirty(){const b=$('#savebtn');if(b){b.textContent=S.dirty?'Salva •':'Salvato';b.className=S.dirty?'primary':''}}
@@ -387,7 +394,7 @@ function renderPanel(){
   ${c.steps.length?'':`<div class="empty">Nessun numero ancora.</div>`}`;
  }
  else{
-  const P=S.P||computePath(c),L=P.total,tps=Math.ceil(L/(c.judgeSpeed||3.5)),tpm=Math.ceil(tps*(c.coeff||1.5));
+  const P=S.P||computePath(c),L=c.refLen>0?c.refLen:P.total,tps=Math.ceil(L/(c.judgeSpeed||3.5)),tpm=Math.ceil(tps*(c.coeff||1.5));
   h+=`<label>Nome percorso</label><input type="text" data-cf="name" value="${esc(c.name)}">
   <div class="row"><div class="grow"><label>Tipo</label><select data-cf="kind">${['Agility','Jumping','Allenamento','Altro'].map(v=>`<option ${v===c.kind?'selected':''}>${v}</option>`).join('')}</select></div>
   <div class="grow"><label>Grado</label><select data-cf="grade">${['','Debuttanti','1','2','3','Open'].map(v=>`<option value="${v}" ${v===c.grade?'selected':''}>${v||'—'}</option>`).join('')}</select></div>
@@ -397,7 +404,8 @@ function renderPanel(){
   <div class="card"><b>Campo</b><div class="row"><div class="grow"><label>Larghezza (m)</label><input type="number" inputmode="decimal" min="5" max="80" data-cf="W" value="${c.W}"></div><div class="grow"><label>Lunghezza (m)</label><input type="number" inputmode="decimal" min="5" max="80" data-cf="H" value="${c.H}"></div></div>
   <div class="row" style="margin-top:10px"><button data-a="rotfield">↻ Ruota campo 90°</button></div></div>
   <div class="card"><b>Tempi del giudice</b><div class="row"><div class="grow"><label>Velocità per TPS (m/s)</label><input type="number" inputmode="decimal" step=".1" min="1" max="7" data-cf="judgeSpeed" value="${c.judgeSpeed}"></div><div class="grow"><label>TPM = TPS ×</label><input type="number" inputmode="decimal" step=".1" min="1" max="3" data-cf="coeff" value="${c.coeff}"></div></div>
-  <div class="stat" style="margin-top:10px" id="stats"><span>Lunghezza percorso</span><b>${fmt(L)} m</b><span>Ostacoli numerati</span><b>${P.items.filter(i=>i.num!=null).length}</b><span>TPS</span><b>${P.items.length>1?tps+' s':'—'}</b><span>TPM</span><b>${P.items.length>1?tpm+' s':'—'}</b></div></div>
+  <label>Lunghezza ufficiale del giudice (m) – facoltativa, sostituisce quella misurata</label><input type="number" inputmode="decimal" step=".1" min="0" data-cf="refLen" value="${c.refLen||''}" placeholder="es. 197,3">
+  <div class="stat" style="margin-top:10px" id="stats"><span>Lunghezza misurata</span><b>${fmt(P.total)} m</b>${c.refLen>0?`<span>Lunghezza ufficiale (usata)</span><b>${fmt(c.refLen)} m</b>`:''}<span>Ostacoli numerati</span><b>${P.items.filter(i=>i.num!=null).length}</b><span>TPS</span><b>${P.items.length>1?tps+' s':'—'}</b><span>TPM</span><b>${P.items.length>1?tpm+' s':'—'}</b></div></div>
   <div class="card"><b>I miei cani</b><div class="muted" style="margin:4px 0 8px">Velocità media in m/s: il tempo stimato è lunghezza ÷ velocità. I cani valgono per tutti i percorsi.</div>
   ${(S.dogs||[]).map((d,i)=>`<div class="dogrow"><input type="text" data-dog="name" data-i="${i}" value="${esc(d.name)}" placeholder="Nome"><input type="number" inputmode="decimal" step=".1" data-dog="speed" data-i="${i}" value="${d.speed}"><button class="danger" data-a="rmdog" data-i="${i}" aria-label="Rimuovi">✕</button></div>${P.items.length>1&&d.speed>0?`<div class="muted" style="margin:-2px 0 8px">→ ${fmt(L/d.speed)} s stimati${L/d.speed>tps?' · <span style="color:var(--dan)">oltre il TPS</span>':' · entro il TPS'}</div>`:''}`).join('')}
   <button data-a="adddog">+ Aggiungi cane</button></div>
@@ -444,7 +452,7 @@ function onPanelInput(e){
   if(t.dataset.of==='len'){const s=$('#lenv');if(s)s.textContent=fmt(v)+' m'}
   if(t.dataset.of==='curve'){const s=$('#curv');if(s)s.textContent=v+'°'}
   markDirty();renderField();}
- else if(t.dataset.cf){const k=t.dataset.cf;if(['W','H','judgeSpeed','coeff'].includes(k)){const v=num(t.value);if(!(v>0))return;if(k==='W'||k==='H'){if(v<5||v>80)return}c[k]=v}else c[k]=t.value;
+ else if(t.dataset.cf){const k=t.dataset.cf;if(k==='refLen'){c.refLen=num(t.value)>0?num(t.value):0;markDirty();updSum();return}if(['W','H','judgeSpeed','coeff'].includes(k)){const v=num(t.value);if(!(v>0))return;if(k==='W'||k==='H'){if(v<5||v>80)return}c[k]=v}else c[k]=t.value;
   if(k==='name')$('#ttl').textContent=t.value;markDirty();renderField();if(k==='W'||k==='H')fitView();}
  else if(t.dataset.sf){c.steps[+t.dataset.i].note=t.value;markDirty();renderField();}
 }
@@ -452,7 +460,7 @@ async function onPanelChange(e){
  const t=e.target;
  if(t.dataset.opt){S[t.dataset.opt]=t.checked;renderField();return}
  if(t.dataset.dog){const d=S.dogs[+t.dataset.i];if(!d)return;d[t.dataset.dog]=t.dataset.dog==='speed'?num(t.value):t.value;await saveDogs();renderPanel();updSum();return}
- if(t.dataset.cf&&['judgeSpeed','coeff','W','H'].includes(t.dataset.cf))renderPanel();
+ if(t.dataset.cf&&['judgeSpeed','coeff','W','H','refLen'].includes(t.dataset.cf))renderPanel();
  if(t.dataset.sf)renderPanel();
 }
 async function saveDogs(){try{await Store.saveDogs(S.dogs)}catch(err){toast('Errore nel salvare i cani: '+(err.code||err.message))}}
