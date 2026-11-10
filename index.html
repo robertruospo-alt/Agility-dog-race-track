@@ -41,6 +41,13 @@ label{font-size:13px;color:var(--muted);display:block;margin:10px 0 4px}
 .cc .nm{font-weight:650}
 .cc .ft{display:flex;gap:6px;padding:0 10px 10px}
 .cc .ft button{flex:1;padding:6px;min-height:36px;font-size:14px}
+.pawwrap{display:flex;justify-content:center;margin:14px 0 4px}
+.paw{border:0;background:none;padding:0;min-height:0;width:230px;max-width:70vw;cursor:pointer;filter:drop-shadow(0 8px 10px rgba(10,60,35,.28));transition:filter .1s}
+.paw:active{transform:none;filter:drop-shadow(0 3px 4px rgba(10,60,35,.3))}
+.paw svg{width:100%;height:auto;display:block;overflow:visible}
+.paw .top{transition:transform .09s ease-out}
+.paw:active .top{transform:translateY(7px)}
+.pawt{fill:#fff;font:800 19px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;text-anchor:middle;paint-order:stroke;stroke:rgba(0,0,0,.18);stroke-width:2px;letter-spacing:.2px}
 .empty{text-align:center;padding:40px 10px;color:var(--muted)}
 /* editor */
 .editor{display:flex;flex-direction:column;height:100vh;height:100dvh}
@@ -289,14 +296,32 @@ function renderList(){
   ${standalone()?'':`<div class="banner"><b>Installala:</b> in Safari tocca Condividi → “Aggiungi alla schermata Home”. Così si apre a schermo intero e funziona anche senza rete.</div>`}
   <div class="tabs" style="margin-top:12px;border-radius:12px;overflow:hidden;border:1px solid var(--line)"><button data-act="ltab" data-t="mine" class="${lib?'':'on'}">I miei (${S.courses.length})</button><button data-act="ltab" data-t="lib" class="${lib?'on':''}">Libreria (${S.lib.length})</button></div>
   ${lib?`<div class="hint">Percorsi di gara ricostruiti dalle mappe pubblicate dai giudici. Aprendone uno ne crei una copia tua da modificare e salvare.</div>`:''}
-  <div class="row" style="margin-top:12px"><input class="grow" type="text" id="q" placeholder="Cerca per nome o giudice…" value="${esc(S.q)}"><button class="primary" data-act="new">+ Nuovo</button><button data-act="import">Importa</button></div>
+  ${lib?'':`<div class="pawwrap"><button class="paw" data-act="new" aria-label="Crea il tuo nuovo percorso"><svg viewBox="0 0 240 222" aria-hidden="true">
+ <defs>
+  <linearGradient id="pawg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3dbb7c"/><stop offset=".55" stop-color="#23854f"/><stop offset="1" stop-color="#186b3f"/></linearGradient>
+  <g id="pawshape">
+   <ellipse cx="50" cy="78" rx="25" ry="31" transform="rotate(-24 50 78)"/>
+   <ellipse cx="98" cy="40" rx="26" ry="33" transform="rotate(-8 98 40)"/>
+   <ellipse cx="148" cy="40" rx="26" ry="33" transform="rotate(8 148 40)"/>
+   <ellipse cx="194" cy="78" rx="25" ry="31" transform="rotate(24 194 78)"/>
+   <path d="M122 96 C166 96 214 142 214 178 C214 208 182 216 154 208 C138 203 130 199 122 199 C114 199 106 203 90 208 C62 216 30 208 30 178 C30 142 78 96 122 96 Z"/>
+  </g>
+ </defs>
+ <use href="#pawshape" fill="#0e4529" transform="translate(0 8)"/>
+ <g class="top">
+  <use href="#pawshape" fill="url(#pawg)"/>
+  <g fill="#fff" opacity=".28"><ellipse cx="44" cy="66" rx="8" ry="12" transform="rotate(-24 44 66)"/><ellipse cx="92" cy="26" rx="8" ry="12" transform="rotate(-8 92 26)"/><ellipse cx="142" cy="26" rx="8" ry="12" transform="rotate(8 142 26)"/><ellipse cx="188" cy="66" rx="8" ry="12" transform="rotate(24 188 66)"/><ellipse cx="98" cy="116" rx="40" ry="10" transform="rotate(-14 98 116)"/></g>
+  <text x="122" y="155" class="pawt">Crea il tuo</text><text x="122" y="178" class="pawt">nuovo percorso</text>
+ </g>
+</svg></button></div>`}
+  <div class="row" style="margin-top:12px"><input class="grow" type="text" id="q" placeholder="Cerca per nome o giudice…" value="${esc(S.q)}"><button data-act="import">Importa</button></div>
   <div class="row" style="margin-top:8px"><button data-act="backup">⬇︎ Backup completo</button><button data-act="restore">⬆︎ Ripristina backup</button><span class="muted">I dati restano su questo dispositivo: fai un backup ogni tanto.</span></div>
   ${S.loading?`<div class="empty">Caricamento…</div>`:list.length?`<div class="grid">${list.map(c=>{
    const th=fieldSVG(c,{badges:true}).svg;
    return`<div class="cc"><div class="th" data-act="open" data-id="${c.id}"><svg viewBox="-1 -1 ${c.W+2} ${c.H+2}" preserveAspectRatio="xMidYMid meet">${th}</svg></div>
    <div class="bd"><div class="nm">${esc(c.name)}</div><div class="muted">${esc([c.kind,c.grade&&('Grado '+c.grade),c.size].filter(Boolean).join(' · '))}</div><div class="muted">${c.W}×${c.H} m · ${(c.obs||[]).filter(o=>!isPA(o.t)).length} ostacoli · ${fmt(c.len||0)} m</div>${lib?(c.judge?`<div class="muted">Giudice: ${esc(c.judge)}</div>`:''):`<div class="muted">Modificato ${new Date(c.updatedAt||0).toLocaleDateString('it-IT')}</div>`}</div>
    <div class="ft">${lib?`<button class="primary" data-act="open" data-id="${c.id}">Apri e copia nei miei</button>`:`<button data-act="open" data-id="${c.id}">Apri</button><button data-act="dupc" data-id="${c.id}">Duplica</button><button class="danger" data-act="delc" data-id="${c.id}">Elimina</button>`}</div></div>`}).join('')}</div>`
-   :`<div class="empty">${q?'Nessun percorso trovato.':lib?'La libreria è vuota o non è raggiungibile.':'Nessun percorso ancora.<br>Tocca “+ Nuovo” per disegnare il primo.'}</div>`}
+   :`<div class="empty">${q?'Nessun percorso trovato.':lib?'La libreria è vuota o non è raggiungibile.':'Nessun percorso ancora.<br>Tocca la zampa per disegnare il primo.'}</div>`}
  </div>`;
  const qi=$('#q');qi.oninput=()=>{S.q=qi.value;const p=qi.selectionStart;renderList();const n=$('#q');n.focus();try{n.setSelectionRange(p,p)}catch(e){}};
 }
