@@ -45,6 +45,9 @@ label{font-size:13px;color:var(--muted);display:block;margin:10px 0 4px}
 /* editor */
 .editor{display:flex;flex-direction:column;height:100vh;height:100dvh}
 .top{display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right)) 8px calc(10px + env(safe-area-inset-left));background:#fff;border-bottom:1px solid var(--line)}
+.top #sharebtn{padding:9px 10px}
+@media (max-width:420px){.top #sharebtn{font-size:0;padding:9px 12px}.top #sharebtn::before{content:'⤴︎';font-size:17px}}
+.sheet .opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin-bottom:8px;padding:12px}.sheet .opt b{display:block}.sheet .opt span.muted{display:block}
 .top .ttl{flex:1;min-width:0;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
 .fw{position:relative;height:50vh;height:50dvh;flex:0 0 auto;background:#dfe8da;overflow:hidden}
 .fw svg{width:100%;height:100%;display:block;touch-action:none;user-select:none;-webkit-user-select:none}
@@ -327,7 +330,7 @@ function openEditor(c,dirty){
 }
 function renderEditor(){
  $('#app').innerHTML=`<div class="editor">
-  <div class="top"><button class="ghost" data-a="back">‹ Percorsi</button><div class="ttl" id="ttl">${esc(S.cur.name)}</div><button class="primary" id="savebtn" data-a="save">Salva</button></div>
+  <div class="top"><button class="ghost" data-a="back">‹ Percorsi</button><div class="ttl" id="ttl">${esc(S.cur.name)}</div><button id="sharebtn" data-a="sharemenu" aria-label="Condividi o stampa">⤴︎ Condividi</button><button class="primary" id="savebtn" data-a="save">Salva</button></div>
   <div class="fw"><svg id="svg" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><g id="layer"></g></svg>
    <div class="modebadge" id="mb"></div>
    <div class="zoom"><button data-a="zin" aria-label="Zoom avanti">+</button><button data-a="zout" aria-label="Zoom indietro">−</button><button data-a="fit" aria-label="Adatta" style="font-size:15px">⤢</button></div></div>
@@ -409,7 +412,7 @@ function renderPanel(){
   <div class="card"><b>I miei cani</b><div class="muted" style="margin:4px 0 8px">Velocità media in m/s: il tempo stimato è lunghezza ÷ velocità. I cani valgono per tutti i percorsi.</div>
   ${(S.dogs||[]).map((d,i)=>`<div class="dogrow"><input type="text" data-dog="name" data-i="${i}" value="${esc(d.name)}" placeholder="Nome"><input type="number" inputmode="decimal" step=".1" data-dog="speed" data-i="${i}" value="${d.speed}"><button class="danger" data-a="rmdog" data-i="${i}" aria-label="Rimuovi">✕</button></div>${P.items.length>1&&d.speed>0?`<div class="muted" style="margin:-2px 0 8px">→ ${fmt(L/d.speed)} s stimati${L/d.speed>tps?' · <span style="color:var(--dan)">oltre il TPS</span>':' · entro il TPS'}</div>`:''}`).join('')}
   <button data-a="adddog">+ Aggiungi cane</button></div>
-  <div class="card"><b>Condividi</b><div class="muted" style="margin:4px 0 8px">Invia il percorso come immagine o come file da reimportare (WhatsApp, Mail, File…).</div><div class="row"><button data-a="sharepng">🖼 Immagine</button><button data-a="sharejson">📄 File percorso</button><button data-a="copyjson">Copia testo</button></div><textarea id="jsonout" rows="4" style="display:none;margin-top:8px" readonly></textarea></div>
+  <div class="card"><b>Condividi</b><div class="muted" style="margin:4px 0 8px">Invia o stampa il percorso come PDF, immagine o file da reimportare (WhatsApp, Mail, File…).</div><div class="row"><button data-a="sharepdf">📄 PDF</button><button data-a="sharepng">🖼 Immagine</button><button data-a="sharejson">📄 File percorso</button><button data-a="copyjson">Copia testo</button></div><textarea id="jsonout" rows="4" style="display:none;margin-top:8px" readonly></textarea></div>
   <div class="muted">La lunghezza segue una linea di corsa ideale tra gli ostacoli (ingresso/uscita per tunnel, zone e slalom): è una stima, come la misura a rotella del giudice.</div>`;
  }
  p.innerHTML=h;
@@ -418,7 +421,8 @@ async function onEdClick(e){
  const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,c=S.cur,i=+b.dataset.i;
  switch(a){
   case'back':{if(S.dirty){const r=await ask('Ci sono modifiche non salvate.',[['cancel','Annulla'],['discard','Esci senza salvare','danger'],['save','Salva','primary']]);if(r==='save'){if(!await save())return}else if(r!=='discard')return}S.view='list';S.cur=null;svg=layer=null;renderList();return}
-  case'save':await save();return;
+  case'save':{const ok=await save();if(ok)toast('Percorso salvato · tocca ⤴︎ Condividi per PDF e stampa');return}
+  case'sharemenu':{if(S.dirty){if(!await save())return}shareSheet(c);return}
   case'zin':zoomAt(1/1.35);return;case'zout':zoomAt(1.35);return;case'fit':fitView();return;
   case'tab':S.tab=b.dataset.t;S.open=null;renderPanel();renderField();$('#panel').scrollTop=0;return;
   case'add':{const t=b.dataset.t;const v=S.vb;const o={id:uid(),t,x:snapV(clamp(v.x+v.w/2,1,c.W-1)),y:snapV(clamp(v.y+v.h/2,1,c.H-1)),r:0};if(t==='tunnel'){o.len=4;o.curve=0}if(t==='slalom')o.poles=12;c.obs.push(o);S.sel=o.id;markDirty();renderField();renderPanel();return}
@@ -442,6 +446,7 @@ async function onEdClick(e){
   case'rmdog':S.dogs.splice(i,1);await saveDogs();renderPanel();updSum();return;
   case'sharejson':{const body=JSON.parse(JSON.stringify(c));delete body.id;shareFile(slug(c.name)+'.json',body);return}
   case'sharepng':sharePNG(c);return;
+  case'sharepdf':sharePDF(c,true);return;
   case'copyjson':{const body=JSON.parse(JSON.stringify(c));delete body.id;const txt=JSON.stringify(body);try{await navigator.clipboard.writeText(txt);toast('Copiato negli appunti')}catch(err){const t=$('#jsonout');t.style.display='';t.value=txt;t.focus();t.select();toast('Seleziona e copia il testo')}return}
  }
 }
@@ -467,7 +472,7 @@ async function saveDogs(){try{await Store.saveDogs(S.dogs)}catch(err){toast('Err
 async function save(){
  const c=S.cur;const P=computePath(c);c.len=Math.round(P.total*10)/10;c.updatedAt=Date.now();
  const b=$('#savebtn');if(b){b.disabled=true;b.textContent='Salvo…'}
- try{await Store.save(c);S.dirty=false;toast('Percorso salvato');return true}
+ try{await Store.save(c);S.dirty=false;return true}
  catch(err){toast(err.code==='quota_exceeded'?'Spazio esaurito: elimina qualche percorso':'Errore nel salvataggio: '+(err.code||err.message));return false}
  finally{if(b)b.disabled=false;updDirty()}
 }
@@ -527,14 +532,71 @@ function restoreBackup(){
   S.courses=a.sort((x,y)=>(y.updatedAt||0)-(x.updatedAt||0));renderList();toast('Backup ripristinato')}catch(e){toast('File di backup non valido')}};
  i.click();
 }
-function sharePNG(c){
- const r=fieldSVG(c,{full:true,dist:S.dist,tags:S.tags});const css=[...document.styleSheets[0].cssRules].map(x=>x.cssText).filter(t=>/^\.(field|g[mM]|border|ruler|bar|wing|wall|frame|tyre|slat|pole|tun|slb|plank|pj|cz|pivot|startc|finc|flagt|path|arr|dist|badge)/.test(t)).join('').replace(/var\(--acc\)/g,'#ff7a00');
- const pad=2,W=c.W+pad*2,H=c.H+pad*2+3.2,sc=Math.min(60,4000/Math.max(W,H));
- const P=r.P,L=P.total,tps=Math.ceil(L/(c.judgeSpeed||3.5)),tpm=Math.ceil(tps*(c.coeff||1.5));
- const info=esc([c.name,[c.kind,c.grade&&('Grado '+c.grade),c.size].filter(Boolean).join(' '),P.items.length>1?`${fmt(L)} m · TPS ${tps} s · TPM ${tpm} s`:''].filter(Boolean).join('  —  '));
- const s=`<svg xmlns="http://www.w3.org/2000/svg" width="${Math.round(W*sc)}" height="${Math.round(H*sc)}" viewBox="${-pad} ${-pad-3.2} ${W} ${H}"><style>${css}</style><rect x="${-pad}" y="${-pad-3.2}" width="${W}" height="${H}" fill="#fff"/><text x="0" y="-2.2" style="font:700 .9px sans-serif;fill:#1d2420">${info}</text>${r.svg.replace(/ data-id="[^"]*"/g,'').replace(/<rect class="hit"[^>]*\/>/g,'')}</svg>`;
- const img=new Image();img.onload=()=>{const cv=document.createElement('canvas');cv.width=img.width;cv.height=img.height;cv.getContext('2d').drawImage(img,0,0);cv.toBlob(b=>{if(b)shareBlob(slug(c.name)+'.png',b);else toast('Impossibile creare l\'immagine')},'image/png')};
- img.onerror=()=>toast('Impossibile creare l\'immagine');img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);
+function courseCanvas(c,maxPx,print){
+ return new Promise((res,rej)=>{
+  const r=fieldSVG(c,{full:true,dist:S.dist,tags:S.tags});const css=[...document.styleSheets[0].cssRules].map(x=>x.cssText).filter(t=>/^\.(field|g[mM]|border|ruler|bar|wing|wall|frame|tyre|slat|pole|tun|slb|plank|pj|cz|pivot|startc|finc|flagt|path|arr|dist|badge)/.test(t)).join('').replace(/var\(--acc\)/g,'#ff7a00')+(print?'.field{fill:#f6f9f4}.gm{stroke:rgba(0,0,0,.07)}.gM{stroke:rgba(0,0,0,.2)}.border{stroke:#8a958c}':'');
+  const pad=1.6,W=c.W+pad*2,H=c.H+pad*2,sc=Math.min(80,(maxPx||4000)/Math.max(W,H));
+  const s=`<svg xmlns="http://www.w3.org/2000/svg" width="${Math.round(W*sc)}" height="${Math.round(H*sc)}" viewBox="${-pad} ${-pad} ${W} ${H}"><style>${css}</style><rect x="${-pad}" y="${-pad}" width="${W}" height="${H}" fill="#fff"/>${r.svg.replace(/ data-id="[^"]*"/g,'').replace(/<rect class="hit"[^>]*\/>/g,'')}</svg>`;
+  const img=new Image();img.onload=()=>{const cv=document.createElement('canvas');cv.width=img.width;cv.height=img.height;const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);g.drawImage(img,0,0);res({cv,P:r.P})};
+  img.onerror=()=>rej(new Error('img'));img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);
+ });
+}
+function courseInfo(c,P){const L=c.refLen>0?c.refLen:P.total,tps=Math.ceil(L/(c.judgeSpeed||3.5)),tpm=Math.ceil(tps*(c.coeff||1.5));return{L,tps,tpm,ok:P.items.length>1}}
+async function sharePNG(c){
+ try{const {cv,P}=await courseCanvas(c,3600);const I=courseInfo(c,P);
+  const top=Math.round(cv.width*0.05),out=document.createElement('canvas');out.width=cv.width;out.height=cv.height+top;const g=out.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,out.width,out.height);g.drawImage(cv,0,top);
+  g.fillStyle='#1d2420';g.font=`700 ${Math.round(top*.42)}px -apple-system,Helvetica,Arial`;g.fillText(c.name||'Percorso',top*.4,top*.55);
+  g.font=`${Math.round(top*.28)}px -apple-system,Helvetica,Arial`;g.fillStyle='#555';g.fillText([[c.kind,c.grade&&('Grado '+c.grade),c.size].filter(Boolean).join(' '),c.judge,I.ok?`${fmt(I.L)} m · TPS ${I.tps} s · TPM ${I.tpm} s`:''].filter(Boolean).join('   —   '),top*.4,top*.92);
+  out.toBlob(b=>{if(b)shareBlob(slug(c.name)+'.png',b);else toast('Impossibile creare l\'immagine')},'image/png');
+ }catch(e){toast('Impossibile creare l\'immagine')}
+}
+let jspdfP=null;
+function loadJsPDF(){if(window.jspdf)return Promise.resolve(window.jspdf);if(!jspdfP)jspdfP=new Promise((res,rej)=>{const sc=document.createElement('script');sc.src='jspdf.umd.min.js';sc.onload=()=>window.jspdf?res(window.jspdf):rej(new Error('jspdf'));sc.onerror=()=>{jspdfP=null;rej(new Error('jspdf'))};document.head.appendChild(sc)});return jspdfP}
+const pdfTxt=t=>String(t==null?'':t).replace(/[–—]/g,'-').replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[^\x20-\x7E\xA0-\xFF\n]/g,'');
+async function sharePDF(c,withList){
+ toast('Preparo il PDF…');
+ try{
+  const [{jsPDF},{cv,P}]=await Promise.all([loadJsPDF(),courseCanvas(c,3200,true)]);
+  const I=courseInfo(c,P),land=c.W>=c.H;
+  const doc=new jsPDF({orientation:land?'landscape':'portrait',unit:'mm',format:'a4'});
+  const PW=doc.internal.pageSize.getWidth(),PH=doc.internal.pageSize.getHeight(),M=10;
+  doc.setFont('helvetica','bold');doc.setFontSize(16);doc.text(pdfTxt(c.name||'Percorso'),M,M+5);
+  doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(90);
+  const sub=[[c.kind,c.grade&&('Grado '+c.grade),c.size&&('Cat. '+c.size)].filter(Boolean).join(' · '),c.judge&&('Giudice: '+c.judge),`Campo ${fmt(c.W)}×${fmt(c.H)} m`].filter(Boolean).join('   |   ');
+  doc.text(pdfTxt(sub),M,M+11);
+  if(I.ok){doc.setTextColor(31,122,77);doc.setFont('helvetica','bold');doc.text(pdfTxt(`Lunghezza ${fmt(I.L)} m${c.refLen>0?' (ufficiale)':''}   ·   TPS ${I.tps} s   ·   TPM ${I.tpm} s`+((S.dogs||[]).filter(d=>d.speed>0).length?'   ·   '+S.dogs.filter(d=>d.speed>0).map(d=>`${d.name||'Cane'} ${fmt(I.L/d.speed)} s`).join(', '):'')),M,M+17)}
+  doc.setTextColor(0);doc.setFont('helvetica','normal');
+  const top=M+21,aw=PW-2*M,ah=PH-top-M-6,ar=cv.width/cv.height;let w=aw,h=w/ar;if(h>ah){h=ah;w=h*ar}
+  doc.addImage(cv.toDataURL('image/jpeg',.92),'JPEG',M+(aw-w)/2,top,w,h);
+  doc.setFontSize(8);doc.setTextColor(140);doc.text(pdfTxt('Percorsi Agility · '+new Date().toLocaleDateString('it-IT')+(c.notes?'  ·  '+c.notes:'')).slice(0,180),M,PH-M+2);doc.setTextColor(0);
+  if(withList&&c.steps.length){
+   doc.addPage('a4','portrait');const W2=doc.internal.pageSize.getWidth(),H2=doc.internal.pageSize.getHeight();
+   doc.setFont('helvetica','bold');doc.setFontSize(14);doc.text(pdfTxt('Sequenza – '+(c.name||'')),M,M+5);
+   const map={};c.obs.forEach(o=>map[o.id]=o);const nums=stepNums(c);let y=M+14;doc.setFontSize(10);
+   c.steps.forEach((st,i)=>{const o=map[st.o];if(!o)return;const n=nums[i];
+    const lbl=(n!=null?n+'.':(o.t==='start'?'P':'A'))+'  '+TYPES[o.t].n+(st.rev?' (verso inverso)':'');
+    const extra=[(st.tags||[]).join(', '),st.note].filter(Boolean).join(' – ');
+    if(y>H2-M){doc.addPage('a4','portrait');y=M+6}
+    doc.setFont('helvetica','bold');doc.text(pdfTxt(lbl),M,y);
+    if(extra){doc.setFont('helvetica','normal');const ln=doc.splitTextToSize(pdfTxt(extra),W2-2*M-60);doc.text(ln,M+60,y);y+=5*Math.max(1,ln.length)}else y+=5.5;
+    doc.setDrawColor(225);doc.line(M,y-3.6,W2-M,y-3.6);
+   });
+  }
+  await shareBlob(slug(c.name)+'.pdf',doc.output('blob'));
+ }catch(e){toast(e&&e.message==='jspdf'?'Serve la rete la prima volta per creare il PDF':'Impossibile creare il PDF')}
+}
+function shareSheet(c){
+ const d=document.createElement('div');d.className='modal';
+ d.innerHTML=`<div class="box sheet"><p><b>Condividi o stampa</b><br><span class="muted">${esc(c.name)}</span></p>
+ <button class="opt" data-k="pdf"><span style="font-size:24px">📄</span><span><b>PDF da stampare</b><span class="muted">Mappa del percorso con lunghezza, TPS e TPM. Dal menu Condividi scegli “Stampa”, WhatsApp, Mail o File.</span></span></button>
+ <button class="opt" data-k="pdfl"><span style="font-size:24px">📋</span><span><b>PDF con sequenza</b><span class="muted">Come sopra più una pagina con i numeri, le sigle di conduzione e le note.</span></span></button>
+ <button class="opt" data-k="png"><span style="font-size:24px">🖼</span><span><b>Immagine</b><span class="muted">PNG da mandare nel gruppo o salvare in Foto.</span></span></button>
+ <button class="opt" data-k="json"><span style="font-size:24px">📁</span><span><b>File percorso</b><span class="muted">Chi lo riceve lo apre con “Importa” e può modificarlo.</span></span></button>
+ <div class="row"><button data-k="x" style="flex:1">Chiudi</button></div></div>`;
+ d.onclick=e=>{const b=e.target.closest('[data-k]');if(!b&&e.target!==d)return;d.remove();const k=b&&b.dataset.k;
+  if(k==='pdf')sharePDF(c,false);else if(k==='pdfl')sharePDF(c,true);else if(k==='png')sharePNG(c);
+  else if(k==='json'){const body=JSON.parse(JSON.stringify(c));delete body.id;shareFile(slug(c.name)+'.json',body)}};
+ document.body.appendChild(d);
 }
 
 /* ---------- avvio ---------- */
